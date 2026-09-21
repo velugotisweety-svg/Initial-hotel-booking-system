@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Booking History</title>
+
+    <link rel="stylesheet"
+          href="../css/style.css">
+
+    <link rel="stylesheet"
+          href="../css/layout.css">
+
+</head>
+
+
+<body>
+
+<header>
+
+    <h1>Hotel Booking</h1>
+
+    <nav>
+
+        <a href="index.html">
+            Hotels
+        </a>
+
+        <a href="bookings.html">
+            My Bookings
+        </a>
+
+    </nav>
+
+</header>
+
+
+<div class="container">
+
+    <h1>Booking History</h1>
+
+    <div id="bookingContainer">
+
+        <p>Loading bookings...</p>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API_URL = "http://localhost:3000";
+
+
+// ========================================
+// LOAD BOOKINGS
+// ========================================
+
+async function loadBookings() {
+
+    const container =
+        document.getElementById("bookingContainer");
+
+    try {
+
+        const response =
+            await fetch(`${API_URL}/bookings`);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to fetch bookings"
+            );
+
+        }
+
+        const bookings =
+            await response.json();
+
+
+        console.log(
+            "Bookings:",
+            bookings
+        );
+
+
+        if (bookings.length === 0) {
+
+            container.innerHTML = `
+                <p>No bookings found.</p>
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML = "";
+
+
+        for (const booking of bookings) {
+
+            let hotelName =
+                "Unknown Hotel";
+
+            let roomDetails =
+                "Unknown Room";
+
+
+            // ========================================
+            // GET HOTEL
+            // ========================================
+
+            try {
+
+                const hotelResponse =
+                    await fetch(
+                        `${API_URL}/hotels/${booking.hotelId}`
+                    );
+
+
+                if (hotelResponse.ok) {
+
+                    const hotel =
+                        await hotelResponse.json();
+
+                    hotelName =
+                        hotel.name;
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Hotel error:",
+                    error
+                );
+
+            }
+
+
+            // ========================================
+            // GET ROOM
+            // ========================================
+
+            try {
+
+                const roomResponse =
+                    await fetch(
+                        `${API_URL}/rooms/${booking.roomId}`
+                    );
+
+
+                if (roomResponse.ok) {
+
+                    const room =
+                        await roomResponse.json();
+
+                    roomDetails =
+                        `Room ${room.roomNumber} - ${room.roomType}`;
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Room error:",
+                    error
+                );
+
+            }
+
+
+            // ========================================
+            // BOOKING CARD
+            // ========================================
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "booking-card";
+
+
+            card.innerHTML = `
+
+                <h2>
+                    ${hotelName}
+                </h2>
+
+                <p>
+                    <strong>Booking ID:</strong>
+                    ${booking.id}
+                </p>
+
+                <p>
+                    <strong>Room:</strong>
+                    ${roomDetails}
+                </p>
+
+                <p>
+                    <strong>Check-in:</strong>
+                    ${booking.checkIn}
+                </p>
+
+                <p>
+                    <strong>Check-out:</strong>
+                    ${booking.checkOut}
+                </p>
+
+                <p>
+                    <strong>Guests:</strong>
+                    ${booking.guests}
+                </p>
+
+                <p>
+                    <strong>Total Amount:</strong>
+                    ₹${booking.totalAmount}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    <span class="booking-status">
+                        ${booking.status}
+                    </span>
+                </p>
+
+                ${
+                    booking.status !== "cancelled"
+
+                    ?
+
+                    `
+                    <button
+                        class="cancel-btn"
+                        onclick="cancelBooking('${booking.id}')">
+
+                        Cancel Booking
+
+                    </button>
+                    `
+
+                    :
+
+                    `
+                    <p>
+                        <strong>
+                            Booking Cancelled
+                        </strong>
+                    </p>
+                    `
+                }
+
+            `;
+
+
+            container.appendChild(card);
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Booking error:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <p>
+                Unable to load booking history.
+            </p>
+
+        `;
+
+    }
+
+}
+
+
+// ========================================
+// CANCEL BOOKING
+// ========================================
+
+async function cancelBooking(id) {
+
+    const confirmCancel =
+        confirm(
+            "Are you sure you want to cancel this booking?"
+        );
+
+
+    if (!confirmCancel) {
+
+        return;
+
+    }
+
+
+    try {
+
+        // ----------------------------------------
+        // Get booking
+        // ----------------------------------------
+
+        const bookingResponse =
+            await fetch(
+                `${API_URL}/bookings/${id}`
+            );
+
+
+        if (!bookingResponse.ok) {
+
+            throw new Error(
+                "Booking not found"
+            );
+
+        }
+
+
+        const booking =
+            await bookingResponse.json();
+
+
+        // ----------------------------------------
+        // Cancel booking
+        // ----------------------------------------
+
+        const cancelResponse =
+            await fetch(
+                `${API_URL}/bookings/${id}`,
+                {
+
+                    method: "PATCH",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        status: "cancelled"
+
+                    })
+
+                }
+            );
+
+
+        if (!cancelResponse.ok) {
+
+            throw new Error(
+                "Unable to cancel booking"
+            );
+
+        }
+
+
+        // ----------------------------------------
+        // Make room available again
+        // ----------------------------------------
+
+        if (booking.roomId) {
+
+            const roomResponse =
+                await fetch(
+                    `${API_URL}/rooms/${booking.roomId}`
+                );
+
+
+            if (roomResponse.ok) {
+
+                await fetch(
+                    `${API_URL}/rooms/${booking.roomId}`,
+                    {
+
+                        method: "PATCH",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body: JSON.stringify({
+
+                            status: "available"
+
+                        })
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        alert(
+            "Booking cancelled successfully!"
+        );
+
+
+        // ----------------------------------------
+        // Refresh page data
+        // ----------------------------------------
+
+        loadBookings();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Cancellation error:",
+            error
+        );
+
+
+        alert(
+            "Unable to cancel booking."
+        );
+
+    }
+
+}
+
+
+// ========================================
+// START
+// ========================================
+
+loadBookings();
+
+</script>
+
+
+</body>
+
+</html>

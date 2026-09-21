@@ -1,0 +1,28 @@
+.page-title {
+    margin-bottom: 25px;
+    color: #1f4e79;
+}
+
+.section {
+    margin-bottom: 30px;
+}
+
+.flex {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.center {
+    text-align: center;
+}
+
+.error {
+    color: red;
+    padding: 15px;
+}
+
+.success {
+    color: green;
+    padding: 15px;
+}

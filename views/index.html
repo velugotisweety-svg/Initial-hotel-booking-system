@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hotel Booking System</title>
+
+    <link rel="stylesheet"
+          href="../css/style.css">
+
+    <link rel="stylesheet"
+          href="../css/layout.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>Hotel Booking</h1>
+
+    <nav>
+
+        <a href="index.html">Hotels</a>
+
+        <a href="bookings.html">My Bookings</a>
+
+    </nav>
+
+</header>
+
+
+<div class="container">
+
+    <h2 class="page-title">
+        Find Your Hotel
+    </h2>
+
+
+    <div class="search-box">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search hotel..."
+        >
+
+        <input
+            type="text"
+            id="locationInput"
+            placeholder="Location"
+        >
+
+        <input
+            type="number"
+            id="maxPrice"
+            placeholder="Maximum price"
+        >
+
+        <button id="searchBtn">
+            Search
+        </button>
+
+    </div>
+
+
+    <div
+        id="hotelContainer"
+        class="hotel-grid">
+    </div>
+
+</div>
+
+
+<script
+    type="module"
+    src="../js/main.js">
+</script>
+
+</body>
+
+</html>
